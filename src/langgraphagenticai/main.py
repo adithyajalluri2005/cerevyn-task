@@ -127,7 +127,7 @@ def speak(text: str) -> None:
     components.html(html_code, height=0)
 
 def transcribe_bytes_wav(wav_bytes: bytes) -> str:
-    api_key = os.getenv("GROQ_API_KEY")
+    api_key =st.secrets["GROQ_API_KEY"]
     if not api_key:
         return "(STT error: GROQ_API_KEY not set)"
     try:
@@ -219,7 +219,7 @@ def load_langgraph_agenticai_app():
         st.markdown("### ⚙️ Settings")
         
         # API Key input
-        if not os.getenv("GROQ_API_KEY"):
+        if not st.secrets["GROQ_API_KEY"]:
             st.error("⚠️ GROQ_API_KEY not set")
             pasted = st.text_input("Enter GROQ_API_KEY", type="password", key="api_key_input")
             if pasted:
