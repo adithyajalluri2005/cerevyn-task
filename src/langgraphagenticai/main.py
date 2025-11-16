@@ -97,7 +97,7 @@ def speak(text: str) -> None:
 
 def listen() -> str:
     # If no GROQ key, fallback to Google SR
-    if not os.getenv("GROQ_API_KEY"):
+    if not st.secrets["GROQ_API_KEY"]:
         rec = sr.Recognizer()
         mic = sr.Microphone()
         with mic as src:
@@ -111,7 +111,7 @@ def listen() -> str:
 
     # Use Groq Whisper
     try:
-        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
         rec = sr.Recognizer()
         mic = sr.Microphone()
         with mic as src:
@@ -240,7 +240,7 @@ def load_langgraph_agenticai_app():
         st.markdown("### ⚙️ Settings & Tools")
         st.markdown('<div class="sidebar-card">', unsafe_allow_html=True)
 
-        if not os.getenv("GROQ_API_KEY"):
+        if not st.secrets["GROQ_API_KEY"]:
             st.warning("GROQ_API_KEY not set — STT will fallback to Google.")
             pasted = st.text_input("GROQ_API_KEY", type="password")
             if pasted:

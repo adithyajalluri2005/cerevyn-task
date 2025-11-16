@@ -1,10 +1,11 @@
 import os
 from typing import Optional
 from langchain_groq import ChatGroq
+import streamlit as st
 
 class GroqLLM:
     def __init__(self, model: str = "openai/gpt-oss-20b", api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("GROQ_API_KEY")
+        self.api_key = api_key or st.secrets["GROQ_API_KEY"]
         if not self.api_key:
             raise ValueError("GROQ_API_KEY is not set in environment.")
         self.model = model
