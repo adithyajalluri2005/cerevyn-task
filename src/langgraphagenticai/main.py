@@ -46,18 +46,29 @@ def _css():
 def generate_call_id(prefix: str = "C") -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8].upper()}-{time.strftime('%y%m%d%H%M%S')}"
 
-def speak(text: str) -> None:
+def init_tts():
     try:
         engine = pyttsx3.init()
         engine.setProperty("rate", 190)
         engine.setProperty("volume", 1.0)
+        TTS_ENGINE = engine
+    except Exception as e:
+        if not st.session_state.get("_tts_unavailable_warned", False):
+            st.warning(f"TTS unavailable on this host ({e}). Falling back to text-only.")
+            st.session_state["_tts_unavailable_warned"] = True
+    return TTS_ENGINE
+
+def speak(text: str) -> None:
+    engine = init_tts()
+    if not engine:
+        return
+    try:
         engine.say(text)
         engine.runAndWait()
     except Exception as e:
-        try:
-            st.warning(f"TTS error: {e}")
-        except Exception:
-            pass
+        if not st.session_state.get("_tts_failed_warned", False):
+            st.warning(f"TTS failed: {e}. Falling back to text-only.")
+            st.session_state["_tts_failed_warned"] = True
 
 def transcribe_bytes_wav(wav_bytes: bytes) -> str:
     api_key = os.getenv("GROQ_API_KEY")
@@ -125,17 +136,6 @@ def json_safe(obj):
         pass
     return str(obj)
 
-def get_supabase_client():
-    if create_client is None:
-        return None
-    url = os.getenv("SUPABASE_URL") or os.getenv("NEXT_PUBLIC_SUPABASE_URL") or ""
-    key = os.getenv("SUPABASE_ANON_KEY") or os.getenv("SUPABASE_KEY") or os.getenv("SUPABASE_SERVICE_ROLE_KEY") or ""
-    if not url or not key:
-        return None
-    try:
-        return create_client(url, key)
-    except Exception:
-        return None
 
 def save_call_log(call_id: str, final_state: dict) -> str:
     path = os.path.join(LOG_DIR, f"{call_id}.json")
