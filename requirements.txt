@@ -1,21 +1,13 @@
-
-langchain-core==1.0.5
-langgraph==1.0.3
-langgraph-checkpoint==3.0.1
-langgraph-prebuilt==1.0.4
-langgraph-sdk==0.2.9
-langsmith==0.4.43
-
-
-ormsgpack==1.12.0
-xxhash==3.6.0
-zstandard==0.25.0
-
 streamlit==1.51.0
 python-dotenv==1.2.1
 groq==0.33.0
 
-SpeechRecognition==3.14.3
-PyAudio==0.2.14
+# Agent graph
+langchain-core==1.0.5
+langgraph==1.0.3
+
+# In-browser mic recorder (no PyAudio needed)
+streamlit-mic-recorder==0.0.8
+
+# TTS (server-side)
 pyttsx3==2.90
-comtypes==1.4.13

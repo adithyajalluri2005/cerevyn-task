@@ -1,0 +1,32 @@
+{
+  "call_id": "C-80090244-251116231134",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "Hi, I am facing an internet issue. How can you solve that?",
+      "ts": 1763314917.478857
+    },
+    {
+      "speaker": "agent",
+      "text": "(System error) Unable to process request.",
+      "ts": 1763314917.4821982
+    },
+    {
+      "speaker": "user",
+      "text": "Hi, I am facing an internet issue. How can you solve that?",
+      "ts": 1763315544.0382154
+    },
+    {
+      "speaker": "agent",
+      "text": "Please run a speed test at https://speedtest.net and let us know the results; we will create a support ticket to investigate further.  \ncreate-speed-ticket  \nSuggested measurement: run speed test on primary device at peak hours, note latency and packet loss.",
+      "ts": 1763315546.5495663
+    }
+  ],
+  "clean_text": "hi, i am facing an internet issue. how can you solve that?",
+  "intent": "Internet Speed Slow",
+  "confidence": 0.8,
+  "entities": {},
+  "script": "Please run a speed test at https://speedtest.net and let us know the results; we will create a support ticket to investigate further.  \ncreate-speed-ticket  \nSuggested measurement: run speed test on primary device at peak hours, note latency and packet loss.",
+  "next_action": "play_tts",
+  "test_input": null
+}
