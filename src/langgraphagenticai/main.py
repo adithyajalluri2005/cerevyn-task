@@ -47,6 +47,7 @@ def generate_call_id(prefix: str = "C") -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8].upper()}-{time.strftime('%y%m%d%H%M%S')}"
 
 def init_tts():
+    TTS_ENGINE = None
     try:
         engine = pyttsx3.init()
         engine.setProperty("rate", 190)
@@ -57,6 +58,7 @@ def init_tts():
             st.warning(f"TTS unavailable on this host ({e}). Falling back to text-only.")
             st.session_state["_tts_unavailable_warned"] = True
     return TTS_ENGINE
+
 
 def speak(text: str) -> None:
     engine = init_tts()
