@@ -5,11 +5,9 @@ import time
 import tempfile
 import streamlit as st
 from dotenv import load_dotenv
-import pyttsx3
 from groq import Groq
 from streamlit_mic_recorder import mic_recorder
 import streamlit.components.v1 as components
-
 
 from src.langgraphagenticai.LLMS.groqllm import GroqLLM
 from src.langgraphagenticai.graph.graph_builder import GraphBuilder
@@ -30,16 +28,81 @@ def _css():
     st.markdown(
         """
         <style>
-        .app-title { font-size:28px; font-weight:700; margin-bottom:6px; }
-        .muted { color:#6b7280; font-size:12px }
-        /* Updated backgrounds and text colors */
-        .transcript-user { background:#fff7ed; padding:10px; border-radius:10px; margin:6px 0; border-left: 4px solid #fb923c; color:#7c2d12; }
-        .transcript-user strong { color:#9a3412; }
-        .transcript-agent { background:#ecfeff; padding:10px; border-radius:10px; margin:6px 0; border-left: 4px solid #06b6d4; color:#0e7490; }
-        .transcript-agent strong { color:#155e75; }
-        .footer-note { font-size:12px; color:#9ca3af; }
-        .big-label { font-size:18px; font-weight:700; margin-top:6px; }
-        .big-value { font-size:40px; font-weight:800; line-height:1.1; }
+        .app-title { 
+            font-size: 32px; 
+            font-weight: 800; 
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .muted { color: #6b7280; font-size: 14px; line-height: 1.6; }
+        .call-id-box {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .transcript-user { 
+            background: #fff7ed; 
+            padding: 14px; 
+            border-radius: 12px; 
+            margin: 8px 0; 
+            border-left: 5px solid #fb923c; 
+            color: #7c2d12;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .transcript-user strong { color: #9a3412; font-size: 13px; }
+        .transcript-agent { 
+            background: #ecfeff; 
+            padding: 14px; 
+            border-radius: 12px; 
+            margin: 8px 0; 
+            border-left: 5px solid #06b6d4; 
+            color: #0e7490;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .transcript-agent strong { color: #155e75; font-size: 13px; }
+        .footer-note { font-size: 11px; color: #9ca3af; margin-top: 16px; }
+        .big-label { 
+            font-size: 14px; 
+            font-weight: 600; 
+            margin-top: 12px; 
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .big-value { 
+            font-size: 48px; 
+            font-weight: 900; 
+            line-height: 1.1;
+            color: #0f172a;
+        }
+        .section-header {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 12px;
+            border-radius: 8px;
+            color: #1e40af;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .stButton > button {
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
         </style>
         """,
         unsafe_allow_html=True,
@@ -47,9 +110,6 @@ def _css():
 
 def generate_call_id(prefix: str = "C") -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8].upper()}-{time.strftime('%y%m%d%H%M%S')}"
-
-
-
 
 def speak(text: str) -> None:
     if not text:
@@ -59,6 +119,8 @@ def speak(text: str) -> None:
     <script>
         const utterance = new SpeechSynthesisUtterance('{escaped_text}');
         utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
         window.speechSynthesis.speak(utterance);
     </script>
     """
@@ -141,183 +203,260 @@ def save_call_log(call_id: str, final_state: dict) -> str:
             st.warning(f"Failed to write local log file: {e}")
         except Exception:
             pass
-    return path  # IMPORTANT: return the path so callers can use it
+    return path
 
 def load_langgraph_agenticai_app():
-    st.set_page_config(page_title="Cerevyn AI — Voice Call", layout="wide")
+    st.set_page_config(page_title="Cerevyn AI — Voice Call Center", layout="wide", initial_sidebar_state="expanded")
     _css()
 
     # Header
-    header_col1, header_col2 = st.columns([6,2])
-    with header_col1:
-        st.markdown('<div class="app-title">🎧 Cerevyn AI — Voice Call</div>', unsafe_allow_html=True)
-        st.markdown('<div class="muted">Voice-only web call with in-browser recording, STT, intent, script, and TTS.</div>', unsafe_allow_html=True)
-    with header_col2:
-        st.markdown(f"**Call ID**\n\n`{st.session_state.get('call_id','-')}`")
-
+    st.markdown('<div class="app-title">🎧 Cerevyn AI — Voice Call Center</div>', unsafe_allow_html=True)
+    st.markdown('<div class="muted">Intelligent voice call system with real-time STT, intent detection, scripted responses, and browser-based TTS.</div>', unsafe_allow_html=True)
     st.markdown("---")
 
     # Sidebar
     with st.sidebar:
         st.markdown("### ⚙️ Settings")
+        
+        # API Key input
         if not os.getenv("GROQ_API_KEY"):
-            st.error("GROQ_API_KEY not set. STT requires Groq Whisper.")
-            pasted = st.text_input("GROQ_API_KEY", type="password")
+            st.error("⚠️ GROQ_API_KEY not set")
+            pasted = st.text_input("Enter GROQ_API_KEY", type="password", key="api_key_input")
             if pasted:
                 os.environ["GROQ_API_KEY"] = pasted
+                st.success("✅ API Key set!")
                 st.rerun()
-        model_name = st.selectbox("LLM Model", ["openai/gpt-oss-20b"], index=0)
-        enable_tts = st.checkbox("Enable TTS (server-side)", value=True)
+        else:
+            st.success("✅ GROQ API Key configured")
+        
         st.markdown("---")
-        if st.button("🔄 New Call ID (sidebar)"):
-            st.session_state['call_id'] = generate_call_id()
-            st.session_state['transcript'] = []
-            st.session_state['last_state'] = None
-            st.rerun()
+        
+        # Model selection
+        model_name = st.selectbox("🤖 LLM Model", ["openai/gpt-oss-20b"], index=0)
+        enable_tts = st.checkbox("🔊 Enable TTS (Browser)", value=True)
+        
+        st.markdown("---")
+        st.markdown("### 📊 Session Info")
+        st.info(f"**Active Call ID:**\n`{st.session_state.get('call_id', 'None')}`")
+        st.info(f"**Total Exchanges:**\n{len(st.session_state.get('transcript', [])) // 2}")
 
-    # Session init
+    # Session state initialization
     if 'call_id' not in st.session_state:
-        st.session_state['call_id'] = generate_call_id()
+        st.session_state['call_id'] = None
     if 'transcript' not in st.session_state:
         st.session_state['transcript'] = []
     if 'last_state' not in st.session_state:
         st.session_state['last_state'] = None
+    if 'call_active' not in st.session_state:
+        st.session_state['call_active'] = False
+    if 'recording' not in st.session_state:
+        st.session_state['recording'] = False
 
-    left, right = st.columns([3,1])
+    # Main layout
+    left, right = st.columns([2.5, 1.5])
 
     with left:
-        st.markdown("### Conversation")
-        st.info("Click Start Call to begin recording. Click End Call to stop. Audio is processed on submit.")
-
-        # In-browser mic recording (no PyAudio)
-        audio = mic_recorder(
-            start_prompt="▶️ Start Call",
-            stop_prompt="⏹ End Call",
-            just_once=False,
-            key="mic",
-            format="wav",
-        )
-
-        if audio and isinstance(audio, dict) and audio.get("bytes"):
-            wav_bytes = audio["bytes"]
-            with st.spinner("Transcribing..."):
-                user_text = transcribe_bytes_wav(wav_bytes)
-
-            if not user_text or user_text.startswith("("):
-                st.error(f"Voice capture failed: {user_text or 'empty input'}")
+        st.markdown('<div class="section-header">📞 Call Interface</div>', unsafe_allow_html=True)
+        
+        # Call controls row
+        col1, col2, col3 = st.columns([1, 1, 2])
+        
+        with col1:
+            start_call_btn = st.button("▶️ Start Call", use_container_width=True, type="primary", disabled=st.session_state.get('call_active', False))
+        
+        with col2:
+            end_call_btn = st.button("⏹ End Call", use_container_width=True, disabled=not st.session_state.get('call_active', False))
+        
+        with col3:
+            if st.session_state.get('call_id'):
+                st.markdown(f'<div class="call-id-box">{st.session_state["call_id"]}</div>', unsafe_allow_html=True)
             else:
-                st.session_state['transcript'].append(
-                    {"speaker":"user","text":user_text,"ts":time.time()}
-                )
+                st.markdown('<div class="call-id-box">No Active Call</div>', unsafe_allow_html=True)
 
-                # Build model + graph
-                try:
-                    model = GroqLLM(model=model_name).get_llm_model()
-                    gb = GraphBuilder(model)
-                    gb.call_center_build_graph()
-                    app = gb.setup_graph()
-                except Exception as e:
-                    st.error(f"Graph init failed: {e}")
-                    app = None
+        # Start call logic
+        if start_call_btn:
+            # Generate new call ID
+            st.session_state['call_id'] = generate_call_id()
+            st.session_state['transcript'] = []
+            st.session_state['last_state'] = None
+            st.session_state['call_active'] = True
+            st.success(f"✅ Call started: {st.session_state['call_id']}")
+            st.rerun()
 
-                init_state: CallState = {
-                    "call_id": st.session_state['call_id'],
-                    "transcript": st.session_state['transcript'],
-                    "clean_text": "",
-                    "intent": "",
-                    "confidence": 0.0,
-                    "entities": {},
-                    "script": "",
-                    "next_action": "end_call",
-                    "test_input": None,
-                }
+        # End call logic
+        if end_call_btn:
+            st.session_state['call_active'] = False
+            st.session_state['transcript'].append({"speaker": "system", "text": "Call ended by user.", "ts": time.time()})
+            st.warning(f"⏹ Call ended: {st.session_state['call_id']}")
+            st.rerun()
 
-                if app is not None:
-                    with st.spinner('Processing...'):
-                        final_state = app.invoke(init_state)
+        st.markdown("---")
+
+        # Recording interface (only if call is active)
+        if st.session_state.get('call_active', False):
+            st.markdown('<div class="info-box">🎙️ Press the button below to record your message. Release to process.</div>', unsafe_allow_html=True)
+            
+            audio = mic_recorder(
+                start_prompt="🎤 Hold to Record",
+                stop_prompt="⏸ Release to Send",
+                just_once=False,
+                key="mic",
+                format="wav",
+            )
+
+            if audio and isinstance(audio, dict) and audio.get("bytes"):
+                wav_bytes = audio["bytes"]
+                
+                with st.spinner("🔄 Transcribing..."):
+                    user_text = transcribe_bytes_wav(wav_bytes)
+
+                if not user_text or user_text.startswith("("):
+                    st.error(f"❌ Voice capture failed: {user_text or 'empty input'}")
                 else:
-                    final_state = {
-                        **init_state,
-                        "script": "(System error) Unable to process request.",
-                        "intent": "error",
+                    st.session_state['transcript'].append(
+                        {"speaker": "user", "text": user_text, "ts": time.time()}
+                    )
+
+                    # Build model + graph
+                    try:
+                        model = GroqLLM(model=model_name).get_llm_model()
+                        gb = GraphBuilder(model)
+                        gb.call_center_build_graph()
+                        app = gb.setup_graph()
+                    except Exception as e:
+                        st.error(f"❌ Graph init failed: {e}")
+                        app = None
+
+                    init_state: CallState = {
+                        "call_id": st.session_state['call_id'],
+                        "transcript": st.session_state['transcript'],
+                        "clean_text": "",
+                        "intent": "",
                         "confidence": 0.0,
+                        "entities": {},
+                        "script": "",
+                        "next_action": "end_call",
+                        "test_input": None,
                     }
 
-                # Normalize script and speak
-                script_text = extract_script_text(final_state.get('script',''))
-                final_state['script'] = script_text
-                if script_text:
-                    st.session_state['transcript'].append(
-                        {"speaker":"agent","text":script_text,"ts":time.time()}
-                    )
-                    if enable_tts:
-                        speak(script_text)
+                    if app is not None:
+                        with st.spinner('🤖 Processing intent...'):
+                            final_state = app.invoke(init_state)
+                    else:
+                        final_state = {
+                            **init_state,
+                            "script": "(System error) Unable to process request.",
+                            "intent": "error",
+                            "confidence": 0.0,
+                        }
 
-                # Save full final state
-                saved_path = save_call_log(st.session_state['call_id'], final_state)
-                st.session_state['last_state'] = {"path": saved_path, "state": json_safe(final_state)}
+                    # Extract response and speak
+                    script_text = extract_script_text(final_state.get('script', ''))
+                    final_state['script'] = script_text
+                    
+                    if script_text:
+                        st.session_state['transcript'].append(
+                            {"speaker": "agent", "text": script_text, "ts": time.time()}
+                        )
+                        if enable_tts:
+                            speak(script_text)
 
-        # Transcript
+                    # Save call log
+                    saved_path = save_call_log(st.session_state['call_id'], final_state)
+                    st.session_state['last_state'] = {"path": saved_path, "state": json_safe(final_state)}
+                    
+                    st.rerun()
+        else:
+            st.info("👆 Click **Start Call** to begin a new conversation")
+
+        # Transcript display
         st.markdown("---")
+        st.markdown('<div class="section-header">💬 Conversation Transcript</div>', unsafe_allow_html=True)
+        
         if st.session_state['transcript']:
             for msg in st.session_state['transcript']:
                 ts = time.strftime('%H:%M:%S', time.localtime(msg['ts']))
                 if msg['speaker'] == 'user':
-                    st.markdown(f"<div class='transcript-user'><strong>Caller • {ts}</strong><div style='margin-top:6px'>{msg['text']}</div></div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='transcript-user'><strong>👤 CALLER • {ts}</strong>"
+                        f"<div style='margin-top:8px; font-size:15px;'>{msg['text']}</div></div>",
+                        unsafe_allow_html=True
+                    )
                 elif msg['speaker'] == 'agent':
-                    st.markdown(f"<div class='transcript-agent'><strong>Agent • {ts}</strong><div style='margin-top:6px'>{msg['text']}</div></div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='transcript-agent'><strong>🤖 AGENT • {ts}</strong>"
+                        f"<div style='margin-top:8px; font-size:15px;'>{msg['text']}</div></div>",
+                        unsafe_allow_html=True
+                    )
                 else:
-                    st.markdown(f"<div class='transcript-user'><strong>System • {ts}</strong><div style='margin-top:6px'>{msg['text']}</div></div>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<div class='transcript-user'><strong>⚙️ SYSTEM • {ts}</strong>"
+                        f"<div style='margin-top:8px; font-size:14px;'>{msg['text']}</div></div>",
+                        unsafe_allow_html=True
+                    )
+        else:
+            st.info("No messages yet. Start a call to begin.")
 
     with right:
-        st.markdown("### Snapshot")
+        st.markdown('<div class="section-header">📊 Analytics Dashboard</div>', unsafe_allow_html=True)
+        
         last = st.session_state.get('last_state')
         if last:
             state = last['state']
-            intent = state.get('intent','-')
-            conf = float(state.get('confidence',0.0) or 0.0)
-            st.markdown("<div class='big-label'>Intent</div>", unsafe_allow_html=True)
+            intent = state.get('intent', 'Unknown')
+            conf = float(state.get('confidence', 0.0) or 0.0)
+            
+            st.markdown("<div class='big-label'>Detected Intent</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='big-value'>{intent}</div>", unsafe_allow_html=True)
-            st.markdown("<div class='big-label'>Confidence</div>", unsafe_allow_html=True)
+            
+            st.markdown("<div class='big-label'>Confidence Score</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='big-value'>{conf:.2f}</div>", unsafe_allow_html=True)
+            
+            st.progress(conf)
 
             st.markdown("---")
-            safe_filename = os.path.basename(last.get('path') or f"{st.session_state.get('call_id','call')}.json")
+            
+            safe_filename = os.path.basename(last.get('path') or f"{st.session_state.get('call_id', 'call')}.json")
             st.download_button(
-                '⬇️ Download Final State',
+                '⬇️ Download Call State',
                 data=json.dumps(state, indent=2),
                 file_name=safe_filename,
                 mime='application/json',
                 use_container_width=True
             )
         else:
-            st.info('No calls yet — start a call to see results.')
+            st.info('📭 No call data yet.\n\nStart a call to see analytics.')
 
         st.markdown('---')
-        st.markdown('### Call Logs')
+        st.markdown('<div class="section-header">📂 Call History</div>', unsafe_allow_html=True)
+        
         logs = sorted([f for f in os.listdir(LOG_DIR) if f.endswith('.json')], reverse=True)
         if logs:
-            selected_log = st.selectbox("Select a log to view (JSON)", logs, index=0)
+            selected_log = st.selectbox("Select a call log", logs, index=0, key="log_selector")
+            
             if selected_log:
                 fpath = os.path.join(LOG_DIR, selected_log)
                 try:
                     with open(fpath, "r", encoding="utf-8") as f:
                         data = json.load(f)
-                    st.json(data)
+                    
+                    with st.expander("📄 View JSON", expanded=False):
+                        st.json(data)
+                    
                     st.download_button(
                         f"⬇️ Download {selected_log}",
                         data=json.dumps(data, indent=2),
                         file_name=selected_log,
                         mime="application/json",
-                        use_container_width=True
+                        use_container_width=True,
+                        key=f"dl-{selected_log}"
                     )
                 except Exception as e:
                     st.error(f"Failed to load log: {e}")
         else:
-            st.write('No saved logs yet.')
+            st.write('📭 No saved logs yet.')
 
-        st.markdown('---')
-        st.markdown('<div class="footer-note">Run: <code>streamlit run app.py</code></div>', unsafe_allow_html=True)
+        st.markdown('<div class="footer-note">Powered by Cerevyn AI • Built with Streamlit</div>', unsafe_allow_html=True)
 
 if __name__ == '__main__':
     load_langgraph_agenticai_app()
