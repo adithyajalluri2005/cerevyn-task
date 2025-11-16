@@ -11,4 +11,4 @@ streamlit-mic-recorder==0.0.8
 
 # TTS (server-side)
 pyttsx3==2.90
-langchain-groq==0.2.1
+langchain-groq
