@@ -125,6 +125,14 @@ def speak(text: str) -> None:
     </script>
     """
     components.html(html_code, height=0)
+INTENTS = [
+    "Billing Issue",
+    "SIM Not Working",
+    "No Network Coverage",
+    "Internet Speed Slow",
+    "Data Not Working After Recharge",
+    "Call Drops Frequently",
+]
 
 def transcribe_bytes_wav(wav_bytes: bytes) -> str:
     api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
@@ -231,7 +239,14 @@ def load_langgraph_agenticai_app():
             st.success("✅ GROQ API Key configured")
         
         st.markdown("---")
-        
+        st.markdown("*Intents*")
+        # Render intents as pill badges using the CSS 'pill' class already present
+        intents_html = "<div style='display:flex; flex-wrap:wrap; gap:8px; margin-top:6px;'>"
+        for it in INTENTS:
+            intents_html += f"<div class='pill' title='{it}' style='font-size:12px; padding:6px 10px;'>{it}</div>"
+        intents_html += "</div>"
+        st.markdown(intents_html, unsafe_allow_html=True)
+
         # Model selection
         model_name = st.selectbox("🤖 LLM Model", ["openai/gpt-oss-20b"], index=0)
         enable_tts = st.checkbox("🔊 Enable TTS (Browser)", value=True)
