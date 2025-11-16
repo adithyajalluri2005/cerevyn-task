@@ -1,0 +1,22 @@
+{
+  "call_id": "C-B4AB580A-251116195933",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "building issues tonight.",
+      "ts": 1763303391.0234084
+    },
+    {
+      "speaker": "agent",
+      "text": "I\u2019m sorry to hear about the billing issue you\u2019re experiencing tonight. I\u2019ve created a support ticket (Ticket #45782) and forwarded it to our billing team. They will review your account and send you a resolution update within the next 24\u202fhours.",
+      "ts": 1763303392.5240705
+    }
+  ],
+  "clean_text": "building issues tonight.",
+  "intent": "Billing Issue",
+  "confidence": 0.1,
+  "entities": {},
+  "script": "I\u2019m sorry to hear about the billing issue you\u2019re experiencing tonight. I\u2019ve created a support ticket (Ticket #45782) and forwarded it to our billing team. They will review your account and send you a resolution update within the next 24\u202fhours.",
+  "next_action": "play_tts",
+  "test_input": null
+}

@@ -1,0 +1,34 @@
+{
+  "call_id": "C-738FA8B2-251116220456",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "Internet is fine but when I get texts they take hours to arrive. What's the problem?",
+      "ts": 1763311145.757309
+    },
+    {
+      "speaker": "agent",
+      "text": "We will open a ticket to investigate SMS delivery delays; you should see an update within 24 hours.  \ncreate-network-investigation  \nProbable cause: SMS routing or gateway issue affecting delivery times, likely related to the local SMS center or carrier network.",
+      "ts": 1763311147.0688553
+    },
+    {
+      "speaker": "user",
+      "text": "the 100 rupees top up is still not activated to my account what's the issue",
+      "ts": 1763311386.960725
+    },
+    {
+      "speaker": "agent",
+      "text": "We have re-provisioned your data; please restart your device now.  \nreprovision-data  \nRecharge amount 100 rupees; automatic reprovisioning attempted.",
+      "ts": 1763311388.2646914
+    }
+  ],
+  "clean_text": "the 100 rupees top up is still not activated to my account what's the issue",
+  "intent": "Data Not Working After Recharge",
+  "confidence": 0.92,
+  "entities": {
+    "recharge_amount": "100"
+  },
+  "script": "We have re-provisioned your data; please restart your device now.  \nreprovision-data  \nRecharge amount 100 rupees; automatic reprovisioning attempted.",
+  "next_action": "play_tts",
+  "test_input": null
+}

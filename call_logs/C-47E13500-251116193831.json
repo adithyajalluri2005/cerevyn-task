@@ -1,0 +1,22 @@
+{
+  "call_id": "C-47E13500-251116193831",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "I am facing some issues with my billing. Can you help me with it?",
+      "ts": 1763302232.4810429
+    },
+    {
+      "speaker": "agent",
+      "text": "I\u2019m sorry you\u2019re having trouble with your billing.  \nTo resolve this quickly, please visit our Billing Support page at\u202fhttps://example.com/billing-support and submit a request\u2014our team will review your account and get back to you within 24\u202fhours.",
+      "ts": 1763302233.379279
+    }
+  ],
+  "clean_text": "i am facing some issues with my billing. can you help me with it?",
+  "intent": "Billing Issue",
+  "confidence": 0.95,
+  "entities": {},
+  "script": "I\u2019m sorry you\u2019re having trouble with your billing.  \nTo resolve this quickly, please visit our Billing Support page at\u202fhttps://example.com/billing-support and submit a request\u2014our team will review your account and get back to you within 24\u202fhours.",
+  "next_action": "play_tts",
+  "test_input": null
+}

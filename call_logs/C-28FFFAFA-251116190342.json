@@ -1,0 +1,29 @@
+{
+  "call_id": "C-28FFFAFA-251116190342",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "Hi, I am facing an issue with my internet speed. Can you please look into it?",
+      "ts": 1763300044.9068806
+    },
+    {
+      "speaker": "agent",
+      "text": "We will run a remote diagnostic and reset your connection. Please wait 5\u202fminutes; after the reset, test your speed again. If the issue persists, we\u2019ll investigate further.",
+      "ts": 1763300046.009549
+    },
+    {
+      "speaker": "user",
+      "text": "I am facing the payment with my bills. Can you look into it please?",
+      "ts": 1763300073.756425
+    },
+    {
+      "speaker": "agent",
+      "text": "I\u2019m sorry you\u2019re having trouble with your bill payment. I\u2019ve opened a support ticket (Ticket\u202f#123456) for your account and our billing team will review the payment and contact you with a resolution within the next 24\u202fhours.",
+      "ts": 1763300074.6187413
+    }
+  ],
+  "intent": "Billing Issue",
+  "confidence": 0.95,
+  "entities": {},
+  "ts": 1763300089.811336
+}

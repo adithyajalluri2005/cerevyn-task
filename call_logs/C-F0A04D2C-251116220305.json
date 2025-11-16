@@ -1,0 +1,22 @@
+{
+  "call_id": "C-F0A04D2C-251116220305",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "I am facing issues with internet from morning onwards what to do",
+      "ts": 1763310803.473623
+    },
+    {
+      "speaker": "agent",
+      "text": "I\u2019m going to start an automated reset of your connection.  \nPlease unplug your modem and router, wait 30\u202fseconds, then plug them back in.  \nOnce they\u2019re fully back online, run a speed test (you can use the Speedtest app or a browser\u2011based test).  \nIf the speed is still below your plan\u2019s minimum, we\u2019ll automatically schedule a technician visit to investigate further.",
+      "ts": 1763310804.3244894
+    }
+  ],
+  "clean_text": "i am facing issues with internet from morning onwards what to do",
+  "intent": "Internet Speed Slow",
+  "confidence": 0.85,
+  "entities": {},
+  "script": "I\u2019m going to start an automated reset of your connection.  \nPlease unplug your modem and router, wait 30\u202fseconds, then plug them back in.  \nOnce they\u2019re fully back online, run a speed test (you can use the Speedtest app or a browser\u2011based test).  \nIf the speed is still below your plan\u2019s minimum, we\u2019ll automatically schedule a technician visit to investigate further.",
+  "next_action": "play_tts",
+  "test_input": null
+}

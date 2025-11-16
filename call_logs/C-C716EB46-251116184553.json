@@ -1,0 +1,45 @@
+{
+  "call_id": "C-C716EB46-251116184553",
+  "scenario": "Telecom - Billing Issue",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "Hi, my last bill is unusually high. Can you check charges for account 9988776655?",
+      "ts": 1763298909.4077854
+    },
+    {
+      "speaker": "agent",
+      "text": "I\u2019m sorry you\u2019re experiencing a billing issue. Please review the latest invoice in your account dashboard and, if it still doesn\u2019t resolve the problem, contact our billing support team directly at 1\u2011800\u2011555\u20111234 (24/7).",
+      "ts": 1763298910.3704407
+    },
+    {
+      "speaker": "user",
+      "text": "Hi, my last bill is unusually high. Can you check charges for account 9988776655?",
+      "ts": 1763298953.746733
+    },
+    {
+      "speaker": "agent",
+      "text": "I understand you\u2019re experiencing a billing issue.  \nTo resolve it, please review your most recent invoice in the **Billing** section of your account dashboard. If any charges appear incorrect, you can submit a dispute directly from that page and the billing team will investigate and resolve the discrepancy.",
+      "ts": 1763298955.0551896
+    },
+    {
+      "speaker": "system",
+      "text": "Call ended by operator.",
+      "ts": 1763298961.8978004
+    },
+    {
+      "speaker": "user",
+      "text": "Hi, my last bill is unusually high. Can you check charges for account 9988776655?",
+      "ts": 1763299160.6296043
+    },
+    {
+      "speaker": "agent",
+      "text": "I understand you\u2019re experiencing a billing concern. The best next step is to review the detailed invoice and payment history in your account portal. If you still need help, please contact our billing support team directly at billing\u2011support@company.com or call 1\u2011800\u2011555\u2011BILL.",
+      "ts": 1763299162.3111405
+    }
+  ],
+  "intent": "Billing Issue",
+  "confidence": 0.0,
+  "entities": {},
+  "timestamp": 1763299179.9849033
+}

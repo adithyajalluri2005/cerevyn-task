@@ -1,0 +1,19 @@
+{
+  "call_id": "C-5326B6F4-251116185248",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "experiencing a internet slow issue please look into it",
+      "ts": 1763299410.980086
+    },
+    {
+      "speaker": "agent",
+      "text": "I understand you\u2019re experiencing a billing issue. To resolve it, please review the billing history in your account dashboard for details of the charges.",
+      "ts": 1763299412.2820244
+    }
+  ],
+  "intent": "Billing Issue",
+  "confidence": 0.0,
+  "entities": {},
+  "timestamp": 1763299421.686419
+}

@@ -1,0 +1,22 @@
+{
+  "call_id": "C-0618E1B7-251116191539",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "is facing issue with my internet bill and unable to pay the bill. How can I retrieve it? How can I solve this?",
+      "ts": 1763300773.7118876
+    },
+    {
+      "speaker": "agent",
+      "text": "I understand you\u2019re having trouble retrieving and paying your internet bill. To fix this, log into your account on our website, go to the **Billing** section, and click **View/Pay Bill** to retrieve the invoice and complete the payment.",
+      "ts": 1763300774.6807086
+    }
+  ],
+  "clean_text": "is facing issue with my internet bill and unable to pay the bill. how can i retrieve it? how can i solve this?",
+  "intent": "Billing Issue",
+  "confidence": 0.9,
+  "entities": {
+    "action": "retrieve and pay",
+    "issue": "internet bill"
+  },
+  "script": 

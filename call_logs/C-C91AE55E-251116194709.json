@@ -1,0 +1,22 @@
+{
+  "call_id": "C-C91AE55E-251116194709",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "I am facing issues with my internet speed today. What do I do?",
+      "ts": 1763303260.4470215
+    },
+    {
+      "speaker": "agent",
+      "text": "Please power\u2011cycle your modem and router: turn them off, wait 30\u202fseconds, then turn them back on. After the devices reboot, test your internet speed again.",
+      "ts": 1763303261.9156294
+    }
+  ],
+  "clean_text": "i am facing issues with my internet speed today. what do i do?",
+  "intent": "Internet Speed Slow",
+  "confidence": 0.95,
+  "entities": {},
+  "script": "Please power\u2011cycle your modem and router: turn them off, wait 30\u202fseconds, then turn them back on. After the devices reboot, test your internet speed again.",
+  "next_action": "play_tts",
+  "test_input": null
+}

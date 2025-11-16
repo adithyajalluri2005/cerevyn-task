@@ -1,0 +1,19 @@
+{
+  "call_id": "C-0AA910FE-251116185857",
+  "transcript": [
+    {
+      "speaker": "user",
+      "text": "I am experiencing a internet downfall issue. Please look into it.",
+      "ts": 1763299764.0065608
+    },
+    {
+      "speaker": "agent",
+      "text": "I understand you\u2019re experiencing a billing issue. I\u2019m opening a support ticket for your account and will review the details right away. You\u2019ll receive a confirmation email with the ticket number and an update within 24\u202fhours.",
+      "ts": 1763299765.1934052
+    }
+  ],
+  "intent": "Billing Issue",
+  "confidence": 0.0,
+  "entities": {},
+  "ts": 1763299777.7918465
+}
