@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 import pyttsx3
 from groq import Groq
 from streamlit_mic_recorder import mic_recorder
+import streamlit.components.v1 as components
+
 
 from src.langgraphagenticai.LLMS.groqllm import GroqLLM
 from src.langgraphagenticai.graph.graph_builder import GraphBuilder
@@ -46,30 +48,21 @@ def _css():
 def generate_call_id(prefix: str = "C") -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8].upper()}-{time.strftime('%y%m%d%H%M%S')}"
 
-def init_tts():
-    TTS_ENGINE = None
-    try:
-        engine = pyttsx3.init()
-        engine.setProperty("rate", 190)
-        engine.setProperty("volume", 1.0)
-        TTS_ENGINE = engine
-    except Exception as e:
-        if not st.session_state.get("_tts_unavailable_warned", False):
-            st.warning(f"TTS unavailable on this host ({e}). Falling back to text-only.")
-            st.session_state["_tts_unavailable_warned"] = True
-    return TTS_ENGINE
+
+
 
 def speak(text: str) -> None:
-    engine = init_tts()
-    if not engine:
+    if not text:
         return
-    try:
-        engine.say(text)
-        engine.runAndWait()
-    except Exception as e:
-        if not st.session_state.get("_tts_failed_warned", False):
-            st.warning(f"TTS failed: {e}. Falling back to text-only.")
-            st.session_state["_tts_failed_warned"] = True
+    escaped_text = text.replace("'", "\\'").replace('"', '\\"').replace("\n", " ")
+    html_code = f"""
+    <script>
+        const utterance = new SpeechSynthesisUtterance('{escaped_text}');
+        utterance.rate = 0.9;
+        window.speechSynthesis.speak(utterance);
+    </script>
+    """
+    components.html(html_code, height=0)
 
 def transcribe_bytes_wav(wav_bytes: bytes) -> str:
     api_key = os.getenv("GROQ_API_KEY")
