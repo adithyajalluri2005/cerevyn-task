@@ -427,7 +427,7 @@ def load_langgraph_agenticai_app():
         if last:
             state = last['state']
             intent = state.get('intent', 'Unknown')
-            conf = float(state.get('confidence', 0.0) or 0.0)
+            conf = float(state.get('confidence', 0.0)*100 or 0.0)
             
             st.markdown("<div class='big-label'>Detected Intent</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='big-value'>{intent}</div>", unsafe_allow_html=True)

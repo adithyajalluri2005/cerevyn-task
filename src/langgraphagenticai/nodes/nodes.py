@@ -46,7 +46,7 @@ class CallCenterNode:
     3) Return a single JSON object ONLY that matches this schema:
     {{
         "intent": "<one of the canonical intents>",
-        "confidence": <float between 1 and 100>,
+        "confidence": <float between 0.0 and 1.0>,
         "entities": {{ <entity_key>: "<string or standardized format>" }},
         "notes": "<short internal note, optional>"
     }}
@@ -56,15 +56,15 @@ class CallCenterNode:
 
     Examples (input -> output):
     1) "My bill is 3500 and I think they overcharged my account 9876543210" ->
-    {{ "intent":"Billing Issue", "confidence":95,
+    {{ "intent":"Billing Issue", "confidence":0.95,
         "entities":{{"account_number":"9876543210","amount":"3500"}},
         "notes":"possible overcharge complaint" }}
     2) "After recharging ₹199 my data still doesn't work since 01-06-2025" ->
-    {{ "intent":"Data Not Working After Recharge","confidence":98,
+    {{ "intent":"Data Not Working After Recharge","confidence":0.98,
         "entities":{{"recharge_amount":"199","date":"2025-06-01"}},
         "notes":"fresh recharge reported" }}
     3) "I keep getting dropped calls in my area" ->
-    {{ "intent":"Call Drops Frequently","confidence":90,
+    {{ "intent":"Call Drops Frequently","confidence":0.90,
         "entities":{{"location":"user_reported_area"}},
         "notes":"user-reported area instability" }}
 
