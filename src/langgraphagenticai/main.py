@@ -150,26 +150,6 @@ def save_call_log(call_id: str, final_state: dict) -> str:
             st.warning(f"Failed to write local log file: {e}")
         except Exception:
             pass
-    # Optional Supabase insert
-    sb = get_supabase_client()
-    if sb:
-        try:
-            table = os.getenv("SUPABASE_TABLE") or "call_states"
-            row = {
-                "call_id": call_id,
-                "final_state": safe_state,
-                "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            }
-            try:
-                sb.table(table).upsert(row, on_conflict="call_id").execute()
-            except Exception:
-                sb.table(table).insert(row).execute()
-        except Exception as e:
-            try:
-                st.warning(f"Supabase insert failed: {e}")
-            except Exception:
-                pass
-    return path
 
 def load_langgraph_agenticai_app():
     st.set_page_config(page_title="Cerevyn AI — Voice Call", layout="wide")
