@@ -76,8 +76,17 @@ class CallCenterNode:
         try:
             nlu_result: NLUOutput = structured_llm.invoke(prompt)
             state['intent'] = nlu_result.intent
-            state['confidence'] = nlu_result.confidence
-            state['entities'] = nlu_result.entities
+
+            # Clamp confidence into [0.0, 1.0]
+            try:
+                conf = float(getattr(nlu_result, "confidence", 0.0))
+            except Exception:
+                conf = 0.0
+            state['confidence'] = max(0.0, min(conf, 1.0))
+
+            # Ensure entities is a dict
+            ents = getattr(nlu_result, "entities", {}) or {}
+            state['entities'] = dict(ents)
         except Exception as e:
             print(f"NLU Structured output failed: {e}")
             state['intent'] = "Unknown"
@@ -85,7 +94,6 @@ class CallCenterNode:
             state['entities'] = {}
 
         return state
-
 
     def billing_issue_node(self, state: CallState) -> CallState:
         prompt = f"""

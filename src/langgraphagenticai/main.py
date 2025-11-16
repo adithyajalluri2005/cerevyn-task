@@ -427,15 +427,19 @@ def load_langgraph_agenticai_app():
         if last:
             state = last['state']
             intent = state.get('intent', 'Unknown')
-            conf = float(state.get('confidence', 0.0)*100 or 0.0)
-            
+
+            # Display confidence as 1..100 (UI), while internal is 0..1
+            conf_raw = float(state.get('confidence', 0.0) or 0.0)  # 0..1
+            conf_pct = max(1.0, min(conf_raw * 100.0, 100.0))     # 1..100 for display
+
             st.markdown("<div class='big-label'>Detected Intent</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='big-value'>{intent}</div>", unsafe_allow_html=True)
             
-            st.markdown("<div class='big-label'>Confidence Score</div>", unsafe_allow_html=True)
-            st.markdown(f"<div class='big-value'>{conf:.2f}</div>", unsafe_allow_html=True)
+            st.markdown("<div class='big-label'>Confidence Score (1–100)</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='big-value'>{conf_pct:.2f}</div>", unsafe_allow_html=True)
             
-            st.progress(conf/100)
+            # Progress bar expects 0..1; mirror the displayed 1..100 range
+            st.progress(conf_pct / 100.0)
 
             st.markdown("---")
             
