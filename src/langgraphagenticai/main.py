@@ -73,7 +73,7 @@ def _css():
             font-size: 14px; 
             font-weight: 600; 
             margin-top: 12px; 
-            color: #64748b;
+            color: white;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -81,7 +81,7 @@ def _css():
             font-size: 48px; 
             font-weight: 900; 
             line-height: 1.1;
-            color: #0f172a;
+            color: white;
         }
         .section-header {
             font-size: 20px;
