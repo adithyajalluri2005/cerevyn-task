@@ -45,13 +45,14 @@ class CallCenterNode:
     2) Extract relevant entities as canonical key:value pairs (use keys like account_number, subscriber_id, date, time, recharge_amount, plan_name, location, device_model, error_code).
     3) Return a single JSON object ONLY that matches this schema:
     {{
-        "intent": "<one of the canonical intents or 'Unknown'>",
+        "intent": "<one of the canonical intents>",
         "confidence": <float between 0.0 and 1.0>,
         "entities": {{ <entity_key>: "<string or standardized format>" }},
         "notes": "<short internal note, optional>"
     }}
 
-    Do NOT return any explanatory text or markdown—only valid JSON. If you are not confident, set "intent" to "Unknown" and "confidence" to a low value (e.g., 0.05). Normalize phone/account numbers by removing non-digit characters. For dates use ISO format YYYY-MM-DD when possible.
+    Do NOT return any explanatory text or markdown—only valid JSON.and "confidence" to a low value (e.g., 0.05). Normalize phone/account numbers by removing non-digit characters. For dates use ISO format YYYY-MM-DD when possible.
+    Dont respond with Unknowmn intent. Always pick the best matching intent from the list.
 
     Examples (input -> output):
     1) "My bill is 3500 and I think they overcharged my account 9876543210" ->
