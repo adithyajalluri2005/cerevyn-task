@@ -2,10 +2,20 @@ from typing_extensions import TypedDict,List
 from typing import Annotated
 from pydantic import BaseModel, Field
 from typing import Literal, Dict, Optional
+AllowedIntent = Literal[
+    "Billing Issue",
+    "SIM Not Working",
+    "No Network Coverage",
+    "Internet Speed Slow",
+    "Data Not Working After Recharge",
+    "Call Drops Frequently",
+]
+
 class NLUOutput(BaseModel):
-    intent: Literal["Billing Issue", "SIM Not Working", "No Network Coverage", "Internet Speed Slow", "Data Not Working After Recharge", "Call Drops Frequently"] = Field(description="Classified intent from predefined categories.")
-    confidence: float = Field(description="Confidence score between 0.0 and 1.0.")
-    entities: Dict[str, str] = Field(default_factory=dict, description="Extracted entities.")
+    intent: AllowedIntent = Field(description="One of the six canonical intents.")
+    confidence: float = Field(ge=0.0, le=1.0, default=0.0, description="0.0..1.0")
+    entities: Dict[str, str] = Field(default_factory=dict)
+    notes: Optional[str] = None
 
 class TranscriptEntry(TypedDict):
     text: str

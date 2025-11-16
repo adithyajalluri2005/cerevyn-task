@@ -6,7 +6,15 @@ import speech_recognition as sr
 from groq import Groq
 import tempfile
 import os
-
+from typing import List, Dict
+ALLOWED_INTENTS: List[str] = [
+    "Billing Issue",
+    "SIM Not Working",
+    "No Network Coverage",
+    "Internet Speed Slow",
+    "Data Not Working After Recharge",
+    "Call Drops Frequently",
+]
 class CallCenterNode:
     def __init__(self, model=None, llm=None):
         # Ensure self.llm is a ChatGroq instance with invoke()/with_structured_output()
@@ -33,64 +41,62 @@ class CallCenterNode:
         return state
 
     def nlu_node(self, state: CallState) -> CallState:
-        intents = [
-                "Billing Issue", "SIM Not Working", "No Network Coverage",
-                "Internet Speed Slow", "Data Not Working After Recharge",
-                "Call Drops Frequently"
-            ]
-        # Strong system-style instructions + few-shot examples + strict JSON-only requirement.
+        intents = ALLOWED_INTENTS
         prompt = f"""
-    You are an NLU module for a telecom call center. Your job:
-    1) Classify the user's intent into exactly one of these canonical intents: {intents}.
-    2) Extract relevant entities as canonical key:value pairs (use keys like account_number, subscriber_id, date, time, recharge_amount, plan_name, location, device_model, error_code).
-    3) Return a single JSON object ONLY that matches this schema:
-    {{
-        "intent": "<one of the canonical intents>",
-        "confidence": <float between 0.0 and 1.0>,
-        "entities": {{ <entity_key>: "<string or standardized format>" }},
-        "notes": "<short internal note, optional>"
-    }}
+You are an NLU module for a telecom call center.
 
-    Do NOT return any explanatory text or markdown—only valid JSON.and "confidence" to a low value (e.g., 0.05). Normalize phone/account numbers by removing non-digit characters. For dates use ISO format YYYY-MM-DD when possible.
-    Dont respond with Unknowmn intent. Always pick the best matching intent from the list.
+Task:
+1) Classify the user's intent into exactly ONE of these intents (must pick one): {intents}
+2) Extract entities as key:value pairs (e.g., account_number, recharge_amount, date(YYYY-MM-DD), location, device_model, error_code)
+3) Return ONLY a single JSON object matching this schema:
+{{
+  "intent": "<one of: {intents}>",
+  "confidence": <float 0.0..1.0>,
+  "entities": {{ "<key>": "<value>" }},
+  "notes": "<optional short note>"
+}}
 
-    Examples (input -> output):
-    1) "My bill is 3500 and I think they overcharged my account 9876543210" ->
-    {{ "intent":"Billing Issue", "confidence":0.95,
-        "entities":{{"account_number":"9876543210","amount":"3500"}},
-        "notes":"possible overcharge complaint" }}
-    2) "After recharging ₹199 my data still doesn't work since 01-06-2025" ->
-    {{ "intent":"Data Not Working After Recharge","confidence":0.98,
-        "entities":{{"recharge_amount":"199","date":"2025-06-01"}},
-        "notes":"fresh recharge reported" }}
-    3) "I keep getting dropped calls in my area" ->
-    {{ "intent":"Call Drops Frequently","confidence":0.90,
-        "entities":{{"location":"user_reported_area"}},
-        "notes":"user-reported area instability" }}
+Rules:
+- Output must be valid JSON only (no markdown, no extra text).
+- Always choose the best matching intent from the list.
+- Normalize numbers by removing non-digits; use ISO date when possible.
 
-    User Input: "{state['clean_text']}"
-    """
-
+User Input: "{state.get('clean_text','')}"
+"""
         structured_llm = self.llm.with_structured_output(NLUOutput)
+
+        def fallback_match(txt: str) -> str:
+            txt = (txt or "").lower()
+            best_intent, best_score = None, -1
+            for intent, kws in INTENT_KEYWORDS.items():
+                score = sum(1 for kw in kws if kw in txt)
+                if score > best_score:
+                    best_score, best_intent = score, intent
+            return best_intent or "Billing Issue"
 
         try:
             nlu_result: NLUOutput = structured_llm.invoke(prompt)
-            state['intent'] = nlu_result.intent
+            intent = str(nlu_result.intent)
+            # Safety: enforce membership
+            if intent not in ALLOWED_INTENTS:
+                intent = fallback_match(state.get('clean_text', ''))
+            state['intent'] = intent
 
-            # Clamp confidence into [0.0, 1.0]
+            # Clamp confidence 0..1, ensure min > 0 to avoid 0% displays
             try:
                 conf = float(getattr(nlu_result, "confidence", 0.0))
             except Exception:
                 conf = 0.0
-            state['confidence'] = max(0.0, min(conf, 1.0))
+            conf = max(0.01, min(conf, 1.0))
+            state['confidence'] = conf
 
-            # Ensure entities is a dict
             ents = getattr(nlu_result, "entities", {}) or {}
             state['entities'] = dict(ents)
         except Exception as e:
-            print(f"NLU Structured output failed: {e}")
-            state['intent'] = "Unknown"
-            state['confidence'] = 0.0
+            # Hard fallback → deterministic keyword routing
+            intent = fallback_match(state.get('clean_text', ''))
+            state['intent'] = intent
+            state['confidence'] = 0.5  # conservative default
             state['entities'] = {}
 
         return state
