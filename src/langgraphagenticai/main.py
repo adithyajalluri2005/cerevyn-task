@@ -435,7 +435,7 @@ def load_langgraph_agenticai_app():
             st.markdown("<div class='big-label'>Confidence Score</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='big-value'>{conf:.2f}</div>", unsafe_allow_html=True)
             
-            st.progress(conf)
+            st.progress(conf/100)
 
             st.markdown("---")
             
