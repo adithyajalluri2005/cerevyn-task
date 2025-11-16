@@ -13,7 +13,7 @@ from src.langgraphagenticai.LLMS.groqllm import GroqLLM
 from src.langgraphagenticai.graph.graph_builder import GraphBuilder
 from src.langgraphagenticai.state.state import CallState
 
-# Optional Supabase (disabled if no key)
+# Optional Supabase (disabled if not installed)
 try:
     from supabase import create_client
 except Exception:
@@ -58,7 +58,6 @@ def init_tts():
             st.warning(f"TTS unavailable on this host ({e}). Falling back to text-only.")
             st.session_state["_tts_unavailable_warned"] = True
     return TTS_ENGINE
-
 
 def speak(text: str) -> None:
     engine = init_tts()
@@ -138,7 +137,6 @@ def json_safe(obj):
         pass
     return str(obj)
 
-
 def save_call_log(call_id: str, final_state: dict) -> str:
     path = os.path.join(LOG_DIR, f"{call_id}.json")
     safe_state = json_safe(final_state)
@@ -150,6 +148,7 @@ def save_call_log(call_id: str, final_state: dict) -> str:
             st.warning(f"Failed to write local log file: {e}")
         except Exception:
             pass
+    return path  # IMPORTANT: return the path so callers can use it
 
 def load_langgraph_agenticai_app():
     st.set_page_config(page_title="Cerevyn AI — Voice Call", layout="wide")
@@ -206,7 +205,6 @@ def load_langgraph_agenticai_app():
             format="wav",
         )
 
-        # When recording finished, audio is a dict like {"bytes": b"...", "sample_rate": 16000}
         if audio and isinstance(audio, dict) and audio.get("bytes"):
             wav_bytes = audio["bytes"]
             with st.spinner("Transcribing..."):
@@ -291,10 +289,11 @@ def load_langgraph_agenticai_app():
             st.markdown(f"<div class='big-value'>{conf:.2f}</div>", unsafe_allow_html=True)
 
             st.markdown("---")
+            safe_filename = os.path.basename(last.get('path') or f"{st.session_state.get('call_id','call')}.json")
             st.download_button(
                 '⬇️ Download Final State',
                 data=json.dumps(state, indent=2),
-                file_name=os.path.basename(last['path']),
+                file_name=safe_filename,
                 mime='application/json',
                 use_container_width=True
             )
