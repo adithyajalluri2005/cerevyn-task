@@ -127,7 +127,7 @@ def speak(text: str) -> None:
     components.html(html_code, height=0)
 
 def transcribe_bytes_wav(wav_bytes: bytes) -> str:
-    api_key =st.secrets["GROQ_API_KEY"]
+    api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
     if not api_key:
         return "(STT error: GROQ_API_KEY not set)"
     try:
@@ -219,7 +219,8 @@ def load_langgraph_agenticai_app():
         st.markdown("### ⚙️ Settings")
         
         # API Key input
-        if not st.secrets["GROQ_API_KEY"]:
+        api_key = st.secrets.get("GROQ_API_KEY") or os.getenv("GROQ_API_KEY")
+        if not api_key:
             st.error("⚠️ GROQ_API_KEY not set")
             pasted = st.text_input("Enter GROQ_API_KEY", type="password", key="api_key_input")
             if pasted:
@@ -249,8 +250,8 @@ def load_langgraph_agenticai_app():
         st.session_state['last_state'] = None
     if 'call_active' not in st.session_state:
         st.session_state['call_active'] = False
-    if 'recording' not in st.session_state:
-        st.session_state['recording'] = False
+    if 'last_audio_id' not in st.session_state:
+        st.session_state['last_audio_id'] = None
 
     # Main layout
     left, right = st.columns([2.5, 1.5])
@@ -280,6 +281,7 @@ def load_langgraph_agenticai_app():
             st.session_state['transcript'] = []
             st.session_state['last_state'] = None
             st.session_state['call_active'] = True
+            st.session_state['last_audio_id'] = None
             st.success(f"✅ Call started: {st.session_state['call_id']}")
             st.rerun()
 
@@ -304,68 +306,74 @@ def load_langgraph_agenticai_app():
                 format="wav",
             )
 
+            # Create unique ID for this audio recording
             if audio and isinstance(audio, dict) and audio.get("bytes"):
-                wav_bytes = audio["bytes"]
+                audio_id = str(hash(audio["bytes"]))
                 
-                with st.spinner("🔄 Transcribing..."):
-                    user_text = transcribe_bytes_wav(wav_bytes)
+                # Only process if this is a NEW recording (prevent re-processing on rerun)
+                if audio_id != st.session_state.get('last_audio_id'):
+                    st.session_state['last_audio_id'] = audio_id
+                    wav_bytes = audio["bytes"]
+                    
+                    with st.spinner("🔄 Transcribing..."):
+                        user_text = transcribe_bytes_wav(wav_bytes)
 
-                if not user_text or user_text.startswith("("):
-                    st.error(f"❌ Voice capture failed: {user_text or 'empty input'}")
-                else:
-                    st.session_state['transcript'].append(
-                        {"speaker": "user", "text": user_text, "ts": time.time()}
-                    )
-
-                    # Build model + graph
-                    try:
-                        model = GroqLLM(model=model_name).get_llm_model()
-                        gb = GraphBuilder(model)
-                        gb.call_center_build_graph()
-                        app = gb.setup_graph()
-                    except Exception as e:
-                        st.error(f"❌ Graph init failed: {e}")
-                        app = None
-
-                    init_state: CallState = {
-                        "call_id": st.session_state['call_id'],
-                        "transcript": st.session_state['transcript'],
-                        "clean_text": "",
-                        "intent": "",
-                        "confidence": 0.0,
-                        "entities": {},
-                        "script": "",
-                        "next_action": "end_call",
-                        "test_input": None,
-                    }
-
-                    if app is not None:
-                        with st.spinner('🤖 Processing intent...'):
-                            final_state = app.invoke(init_state)
+                    if not user_text or user_text.startswith("("):
+                        st.error(f"❌ Voice capture failed: {user_text or 'empty input'}")
                     else:
-                        final_state = {
-                            **init_state,
-                            "script": "(System error) Unable to process request.",
-                            "intent": "error",
+                        st.session_state['transcript'].append(
+                            {"speaker": "user", "text": user_text, "ts": time.time()}
+                        )
+
+                        # Build model + graph
+                        try:
+                            model = GroqLLM(model=model_name).get_llm_model()
+                            gb = GraphBuilder(model)
+                            gb.call_center_build_graph()
+                            app = gb.setup_graph()
+                        except Exception as e:
+                            st.error(f"❌ Graph init failed: {e}")
+                            app = None
+
+                        init_state: CallState = {
+                            "call_id": st.session_state['call_id'],
+                            "transcript": st.session_state['transcript'],
+                            "clean_text": "",
+                            "intent": "",
                             "confidence": 0.0,
+                            "entities": {},
+                            "script": "",
+                            "next_action": "end_call",
+                            "test_input": None,
                         }
 
-                    # Extract response and speak
-                    script_text = extract_script_text(final_state.get('script', ''))
-                    final_state['script'] = script_text
-                    
-                    if script_text:
-                        st.session_state['transcript'].append(
-                            {"speaker": "agent", "text": script_text, "ts": time.time()}
-                        )
-                        if enable_tts:
-                            speak(script_text)
+                        if app is not None:
+                            with st.spinner('🤖 Processing intent...'):
+                                final_state = app.invoke(init_state)
+                        else:
+                            final_state = {
+                                **init_state,
+                                "script": "(System error) Unable to process request.",
+                                "intent": "error",
+                                "confidence": 0.0,
+                            }
 
-                    # Save call log
-                    saved_path = save_call_log(st.session_state['call_id'], final_state)
-                    st.session_state['last_state'] = {"path": saved_path, "state": json_safe(final_state)}
-                    
-                    st.rerun()
+                        # Extract response and speak
+                        script_text = extract_script_text(final_state.get('script', ''))
+                        final_state['script'] = script_text
+                        
+                        if script_text:
+                            st.session_state['transcript'].append(
+                                {"speaker": "agent", "text": script_text, "ts": time.time()}
+                            )
+                            if enable_tts:
+                                speak(script_text)
+
+                        # Save call log
+                        saved_path = save_call_log(st.session_state['call_id'], final_state)
+                        st.session_state['last_state'] = {"path": saved_path, "state": json_safe(final_state)}
+                        
+                        st.rerun()
         else:
             st.info("👆 Click **Start Call** to begin a new conversation")
 
